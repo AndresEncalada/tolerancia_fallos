@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  
+  # 1. API Gateway & Servicio de Reservas
+  gateway_service:
+    build: ./gateway_service
+    container_name: gateway_core
+    ports:
+      - "8000:8000"  # Puerto expuesto al mundo (Postman/Navegador)
+    environment:
+      - INVENTORY_URL=http://inventory_service:8001
+      - PAYMENT_URL=http://payment_service:8002
+      - NOTIFICATION_URL=http://notification_service:8003
+    depends_on:
+      - inventory_service
+      - payment_service
+    networks:
+      - reserva_net
+
+  # 2. Servicio de Inventario (Simula fallos de Crash)
+  inventory_service:
+    build: ./inventory_service
+    container_name: inventory_stub
+    environment:
+      - FAILURE_MODE=none  # Cambiar esto a 'crash' para la demo
+    ports:
+      - "8001:8001"
+    networks:
+      - reserva_net
+
+  # 3. Servicio de Pagos
+  payment_service:
+    build: ./payment_service
+    container_name: payment_stub
+    environment:
+      - FAILURE_MODE=none  # Cambiar esto a 'latency' para la demo
+    ports:
+      - "8002:8002"
+    networks:
+      - reserva_net
+
+ #-------------------------------------
+  
+  # 4. Servicio de Notificaciones
+  notification_service:
+    build: ./notification_service
+    container_name: notification_worker
+    environment:
+      - EMAIL_PROVIDER=mock
+    ports:
+      - "8003:8003"
+    networks:
+      - reserva_net
+
+networks:
+  reserva_net:
+    driver: bridge
