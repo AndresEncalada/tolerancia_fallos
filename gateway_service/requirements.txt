@@ -2,5 +2,4 @@ fastapi
 uvicorn
 requests
 pydantic
-tenacity  # Para los Retries (reintentos)
-pybreaker # Para el Circuit Breaker
+aiofiles

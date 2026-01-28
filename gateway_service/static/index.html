@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Reservas - Chaos Demo</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: bold;
+        }
+
+        .btn-buy {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-buy:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-chaos {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-chaos:hover {
+            background-color: #a71d2a;
+        }
+
+        #results {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .card {
+            width: 100%;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left;
+            position: relative;
+            animation: fadeIn 0.3s;
+            border-left: 5px solid #ccc;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .success {
+            border-left-color: #28a745;
+            background: #e6fffa;
+        }
+
+        /* Verde */
+        .error {
+            border-left-color: #dc3545;
+            background: #ffe6e6;
+        }
+
+        /* Rojo */
+        .fallback {
+            border-left-color: #ffc107;
+            background: #fff9db;
+        }
+
+        /* Amarillo */
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        .bg-green {
+            background: #28a745;
+        }
+
+        .bg-red {
+            background: #dc3545;
+        }
+
+        .bg-yellow {
+            background: #d39e00;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎟️ Reserva de Entradas</h1>
+        <div style="background: #333; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <h3>Panel de Control</h3>
+            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+
+                <div style="border: 1px solid #555; padding: 10px; border-radius: 5px;">
+                    <p style="margin:0 0 10px 0; font-size: 14px;">Inventario (Circuit Breaker)</p>
+                    <button onclick="setChaosInventory('crash')"
+                        style="background:#dc3545; color:white; padding:5px 10px; font-size:12px;">DAÑAR</button>
+                    <button onclick="setChaosInventory('none')"
+                        style="background:#28a745; color:white; padding:5px 10px; font-size:12px;">ARREGLAR</button>
+                </div>
+
+                <div style="border: 1px solid #555; padding: 10px; border-radius: 5px;">
+                    <p style="margin:0 0 10px 0; font-size: 14px;">Base de Datos (Retries)</p>
+                    <button onclick="setChaosDB(true)"
+                        style="background:#dc3545; color:white; padding:5px 10px; font-size:12px;">DAÑAR</button>
+                    <button onclick="setChaosDB(false)"
+                        style="background:#28a745; color:white; padding:5px 10px; font-size:12px;">ARREGLAR</button>
+                </div>
+
+                <div style="border: 1px solid #555; padding: 10px; border-radius: 5px;">
+                    <p style="margin:0 0 10px 0; font-size: 14px;">Pagos (Timeout)</p>
+                    <button onclick="setChaosPayment('latency')"
+                        style="background:#ffc107; color:black; padding:5px 10px; font-size:12px;">LENTO</button>
+                    <button onclick="setChaosPayment('none')"
+                        style="background:#28a745; color:white; padding:5px 10px; font-size:12px;">NORMAL</button>
+                </div>
+
+                <div style="border: 1px solid #555; padding: 10px; border-radius: 5px;">
+                    <p style="margin:0 0 10px 0; font-size: 14px;">Correo (Non-Critical)</p>
+                    <button onclick="setChaosNotification('down')"
+                        style="background:#dc3545; color:white; padding:5px 10px; font-size:12px;">APAGAR</button>
+                    <button onclick="setChaosNotification('up')"
+                        style="background:#28a745; color:white; padding:5px 10px; font-size:12px;">ENCENDER</button>
+                </div>
+
+                <div style="border: 1px solid #555; padding: 10px; border-radius: 5px;">
+                    <p style="margin:0 0 10px 0; font-size: 14px;">Gestión Stock</p>
+                    <button onclick="resetStock()"
+                        style="background:#17a2b8; color:white; padding:5px 10px; font-size:12px;">RESET STOCK</button>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn-buy" onclick="buyTicket()">Comprar 1 Ticket</button>
+            <button class="btn-chaos" onclick="spamTickets()">Envíar 10 peticiones</button>
+            <button onclick="clearLog()" style="background:#6c757d; color:white;">Limpiar</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        // --- FUNCIONES DE CONTROL ---
+        async function setChaosPayment(mode) {
+            await fetch('/control/payment-chaos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mode: mode })
+            });
+            alert(`Pagos Latencia: ${mode}`);
+        }
+
+        async function setChaosNotification(status) {
+            await fetch('/control/notification-chaos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: status })
+            });
+            alert(`Notificaciones: ${status}`);
+        }
+
+        async function setChaosInventory(mode) {
+            await fetch('/control/inventory-chaos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mode: mode })
+            });
+            alert(`Inventario en modo: ${mode.toUpperCase()}`);
+        }
+
+        async function setChaosDB(enable) {
+            await fetch('/control/db-chaos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ enable: enable })
+            });
+            alert(`Base de Datos inestable: ${enable}`);
+        }
+
+        async function resetStock() {
+            try {
+                const response = await fetch('/control/inventory-reset', { method: 'POST' });
+                if (response.ok) {
+                    alert('✅ Stock reiniciado a valores originales (100 tickets)');
+                } else {
+                    alert('❌ Error reiniciando stock');
+                }
+            } catch (e) {
+                alert('Error de conexión al reiniciar stock');
+            }
+        }
+
+        // --- FUNCIONES DE COMPRA ---
+
+        async function buyTicket() {
+            const resultsDiv = document.getElementById('results');
+            const id = Math.random().toString(36).substr(2, 5);
+
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `⏳ Procesando pedido...`;
+            resultsDiv.prepend(card);
+
+            try {
+                const response = await fetch('/buy-ticket', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: `user_${id}`,
+                        item_id: "ticket_vip",
+                        amount: 100.0
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.status === 'success') {
+                    card.className = 'card success';
+                    let emailWarning = '';
+                    if (data.email_status === 'failed') {
+                        emailWarning = `<div style="margin-top:5px; font-size:12px; color:#856404; background:#fff3cd; padding:5px; border-radius:4px; border:1px solid #ffeeba;">
+                                            ⚠️ <b>Nota:</b> El correo de confirmación no pudo enviarse (Fallo No Crítico).
+                                        </div>`;
+                    }
+
+                    card.innerHTML = `<span class="badge bg-green">EXITO</span> <b>Orden:</b> ${data.order_id} <br> 
+                                      <small>Guardado en BD</small>
+                                      ${emailWarning}`; // <--- Agregamos la advertencia aquí
+
+                } else if (data.status === 'pending') {
+                    card.className = 'card fallback';
+                    card.innerHTML = `<span class="badge bg-yellow">FALLBACK ACTIVADO</span> <b>${data.message}</b> <br> <small>Orden temporal: ${data.order_id}</small>`;
+                } else {
+                    card.className = 'card error';
+                    card.innerHTML = `<span class="badge bg-red">ERROR ${response.status}</span> ${data.detail || JSON.stringify(data)}`;
+                }
+
+            } catch (err) {
+                card.className = 'card error';
+                card.innerHTML = `<span class="badge bg-red">NETWORK ERROR</span> Gateway no responde.`;
+            }
+        }
+
+        function spamTickets() {
+            let count = 0;
+            const interval = setInterval(() => {
+                buyTicket();
+                count++;
+                if (count >= 10) clearInterval(interval);
+            }, 500);
+        }
+
+        function clearLog() {
+            document.getElementById('results').innerHTML = '';
+        }
+    </script>
+</body>
+
+</html>
